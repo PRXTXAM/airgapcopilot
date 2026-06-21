@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus AI | Secure Predictive NOC Copilot</title>
+  <meta name="description" content="Air-Gapped Offline AI NOC Copilot for Secure MPLS & SD-WAN Operations.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="logo-container">
+      <span class="logo-glow" id="header-logo-glow"></span>
+      <h1 class="logo-text">Nexus AI</h1>
+    </div>
+    
+    <div class="header-controls">
+      <div class="status-badge" id="airgap-status-badge">
+        <span class="status-dot"></span>
+        <span>AIR-GAPPED COMPLIANT</span>
+      </div>
+      <div class="sim-time" id="sim-clock-display">
+        CLOCK: 2026-06-22 00:55:00
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid Dashboard Layout -->
+  <main>
+    
+    <!-- Column 1: Topology Map & Fault Scenario Panel -->
+    <section class="col-topology">
+      <!-- Network Topology Visualization Card -->
+      <div class="card" id="card-topology-viz">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/><path d="M12 6V2"/><path d="M12 22v-4"/><path d="M18 12h4"/><path d="M2 12h4"/><path d="M12 12m-3 0a3 3 0 1 0 6 0 3 3 0 1 0-6 0"/></svg>
+            <span>SD-WAN Over MPLS Topology</span>
+          </div>
+          <div style="font-size: 0.65rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;" id="topology-active-path">
+            PATH: PRIMARY MPLS (ACTIVE)
+          </div>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div class="topology-canvas-container">
+            <div style="position: absolute; top: 10px; right: 10px; font-size: 0.65rem; color: var(--accent-purple); font-family: 'JetBrains Mono', monospace; pointer-events: none; background: rgba(8, 8, 16, 0.75); padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid var(--border-color); z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.5);">DRAG NODES | CLICK LINKS TO CUT/HEAL</div>
+            <canvas id="topology-canvas"></canvas>
+            
+            <!-- Topology Floating Legend -->
+            <div class="canvas-legend">
+              <div class="legend-item">
+                <span class="legend-color" style="background-color: var(--accent-cyan);"></span>
+                <span>MPLS Forwarding Link</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background-color: var(--accent-purple);"></span>
+                <span>IPSec VPN Tunnel</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background-color: var(--success);"></span>
+                <span>Voice/Data Traffic</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background-color: var(--accent-blue);"></span>
+                <span>Control Plane (BGP/OSPF)</span>
+              </div>
+            </div>
+            
+            <!-- Hover Node Tooltip -->
+            <div class="topology-tooltip" id="topology-tooltip"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Fault Injection Controls Card -->
+      <div class="card" id="card-scenario-controls">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            <span>Fault Injection Scenarios</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="scenario-grid">
+            <button class="btn-scenario" id="btn-scen-congestion" onclick="window.app.triggerScenario('congestion')">
+              <span class="scenario-title">1. Hub-Spoke Congestion</span>
+              <span class="scenario-desc">Ramp link utilization on BR-1 primary interface Gi0/1.</span>
+            </button>
+            <button class="btn-scenario" id="btn-scen-flap" onclick="window.app.triggerScenario('bgp_flap')">
+              <span class="scenario-title">2. BGP Route Flapping</span>
+              <span class="scenario-desc">Spike adjacency events on P-1, triggering paths reroutes.</span>
+            </button>
+            <button class="btn-scenario" id="btn-scen-failure" onclick="window.app.triggerScenario('mpls_failure')">
+              <span class="scenario-title">3. Underlay MPLS Decay</span>
+              <span class="scenario-desc">Inject intermittent CRC packet loss along Core link P-1 -> DC-PE-1.</span>
+            </button>
+            <button class="btn-scenario" id="btn-scen-drift" onclick="window.app.triggerScenario('policy_drift')">
+              <span class="scenario-title">4. Controller Policy Drift</span>
+              <span class="scenario-desc">Inject local configuration variance to lower compliance indexes.</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Column 2: Live Telemetry & Playbook execution -->
+    <section class="col-telemetry">
+      <!-- Live Metrics KPI Header -->
+      <div class="kpi-grid">
+        <div class="kpi-card" id="kpi-latency">
+          <span class="kpi-label">Latency Drift</span>
+          <div class="kpi-val-container">
+            <span class="kpi-value" id="kpi-val-latency">25.4 ms</span>
+            <span class="kpi-trend stable" id="kpi-trend-latency">0.0%</span>
+          </div>
+        </div>
+        <div class="kpi-card" id="kpi-loss">
+          <span class="kpi-label">Packet Loss</span>
+          <div class="kpi-val-container">
+            <span class="kpi-value" id="kpi-val-loss">0.0%</span>
+            <span class="kpi-trend stable" id="kpi-trend-loss">0.0%</span>
+          </div>
+        </div>
+        <div class="kpi-card" id="kpi-bgp">
+          <span class="kpi-label">Route Instability</span>
+          <div class="kpi-val-container">
+            <span class="kpi-value" id="kpi-val-bgp">2.0 /m</span>
+            <span class="kpi-trend stable" id="kpi-trend-bgp">Stable</span>
+          </div>
+        </div>
+        <div class="kpi-card" id="kpi-tunnel">
+          <span class="kpi-label">Tunnel Health</span>
+          <div class="kpi-val-container">
+            <span class="kpi-value" id="kpi-val-tunnel">99.2%</span>
+            <span class="kpi-trend stable" id="kpi-trend-tunnel">Healthy</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Live Predictive Telemetry Charts -->
+      <div class="card" style="flex: 1; min-height: 0;">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span>Time-Series Predictive Telemetry</span>
+          </div>
+          <div id="predictive-timer-badge" style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--success); padding: 0.25rem 0.5rem; background: rgba(16,185,129,0.06); border-radius: 4px; display: none;">
+            FORECAST: SLA STABLE
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <div class="charts-container">
+            
+            <!-- Chart 1: Interface Utilization -->
+            <div class="chart-box" id="chart-utilization-box">
+              <div class="chart-title-bar">
+                <span class="chart-label">Branch-1 Interface Utilization (SLA: 90%)</span>
+                <span class="chart-live-val" id="val-utilization">45.0%</span>
+              </div>
+              <div class="svg-chart-container">
+                <svg id="svg-utilization" viewBox="0 0 400 100" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="cyan-gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="var(--accent-cyan)" stop-opacity="0.2"/>
+                      <stop offset="100%" stop-color="var(--accent-cyan)" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <!-- SLA limit line -->
+                  <line x1="0" y1="18" x2="400" y2="18" class="chart-limit-line" />
+                  <!-- Grid lines -->
+                  <line x1="0" y1="25" x2="400" y2="25" class="chart-grid-line" />
+                  <line x1="0" y1="50" x2="400" y2="50" class="chart-grid-line" />
+                  <line x1="0" y1="75" x2="400" y2="75" class="chart-grid-line" />
+                  <!-- Plot lines -->
+                  <path id="path-utilization-area" class="chart-area" d="" />
+                  <path id="path-utilization" class="chart-plot-line" d="" />
+                  <path id="forecast-utilization" class="chart-forecast-line" d="" />
+                </svg>
+              </div>
+            </div>
+            
+            <!-- Chart 2: Latency Drift -->
+            <div class="chart-box" id="chart-latency-box">
+              <div class="chart-title-bar">
+                <span class="chart-label">One-Way Latency Drift (SLA: 80ms)</span>
+                <span class="chart-live-val" id="val-latency">25.4 ms</span>
+              </div>
+              <div class="svg-chart-container">
+                <svg id="svg-latency" viewBox="0 0 400 100" preserveAspectRatio="none">
+                  <line x1="0" y1="20" x2="400" y2="20" class="chart-limit-line" />
+                  <line x1="0" y1="25" x2="400" y2="25" class="chart-grid-line" />
+                  <line x1="0" y1="50" x2="400" y2="50" class="chart-grid-line" />
+                  <line x1="0" y1="75" x2="400" y2="75" class="chart-grid-line" />
+                  <path id="path-latency" class="chart-plot-line" d="" />
+                  <path id="forecast-latency" class="chart-forecast-line" d="" />
+                </svg>
+              </div>
+            </div>
+            
+            <!-- Chart 3: Packet Loss -->
+            <div class="chart-box" id="chart-loss-box">
+              <div class="chart-title-bar">
+                <span class="chart-label">Underlay Link Packet Loss (SLA: 3.0%)</span>
+                <span class="chart-live-val" id="val-loss">0.0%</span>
+              </div>
+              <div class="svg-chart-container">
+                <svg id="svg-loss" viewBox="0 0 400 100" preserveAspectRatio="none">
+                  <line x1="0" y1="25" x2="400" y2="25" class="chart-limit-line" />
+                  <line x1="0" y1="25" x2="400" y2="25" class="chart-grid-line" />
+                  <line x1="0" y1="50" x2="400" y2="50" class="chart-grid-line" />
+                  <line x1="0" y1="75" x2="400" y2="75" class="chart-grid-line" />
+                  <path id="path-loss" class="chart-plot-line" d="" />
+                  <path id="forecast-loss" class="chart-forecast-line" d="" />
+                </svg>
+              </div>
+            </div>
+            
+          </div>
+          
+          <!-- Automated Action Remediation Dock -->
+          <div class="playbook-card" id="card-playbook-dock">
+            <div class="playbook-header">
+              <span>ACTIVE PLAYBOOK ACTIONS</span>
+              <span>STANDBY</span>
+            </div>
+            <div id="playbook-steps-container">
+              <div style="color: var(--text-secondary); font-size: 0.75rem; text-align: center; padding: 1rem 0;">
+                No active incident playbook recommended.
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </section>
+    
+    <!-- Column 3: Offline RAG AI NOC Copilot Panel -->
+    <section class="col-copilot card" id="card-copilot-container">
+      <div class="copilot-tabs">
+        <button class="tab-btn active" id="btn-tab-copilot" onclick="window.app.switchTab('copilot')">
+          AI Copilot Terminal
+        </button>
+        <button class="tab-btn" id="btn-tab-rag" onclick="window.app.switchTab('rag')">
+          RAG Vector Index
+        </button>
+      </div>
+      
+      <!-- Tab 1 Content: AI Copilot Chat Window -->
+      <div class="tab-content active" id="content-tab-copilot">
+        <div class="chat-container" id="copilot-chat-log">
+          <!-- Initial Welcome Message from Local LLM -->
+          <div class="chat-bubble assistant" id="welcome-chat-bubble">
+            <div class="copilot-meta">
+              <span>LOCAL LLM NOC COPILOT</span>
+              <span>ESTABLISHED</span>
+            </div>
+            <div class="structured-copilot">
+              <div class="copilot-sec-body">
+                Hello Operator. I am your autonomous, air-gapped Predictive NOC assistant. I monitor the simulated SD-WAN/MPLS environment for anomalies, routing stress, and compliance drift.
+              </div>
+              <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--accent-cyan); font-weight: 600;">
+                Suggested Operator Queries:
+              </div>
+              <div class="copilot-pills">
+                <button class="copilot-pill-tag" style="border:1px solid rgba(0,240,255,0.4); cursor:pointer; background:rgba(0,240,255,0.05);" onclick="window.app.sendQuickQuery('Show BGP dampening recommendations')">Show BGP dampening recommendations</button>
+                <button class="copilot-pill-tag" style="border:1px solid rgba(0,240,255,0.4); cursor:pointer; background:rgba(0,240,255,0.05);" onclick="window.app.sendQuickQuery('What is the backup steering configuration for IPsec tunnels?')">What is backup steering?</button>
+                <button class="copilot-pill-tag" style="border:1px solid rgba(0,240,255,0.4); cursor:pointer; background:rgba(0,240,255,0.05);" onclick="window.app.sendQuickQuery('Explain policy drift symptoms')">Explain policy drift</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Chat Console Input -->
+        <div class="chat-input-bar">
+          <input type="text" class="chat-input-field" id="copilot-input-field" placeholder="Ask offline AI NOC Copilot... (e.g., /analyze)" onkeydown="if(event.key === 'Enter') window.app.sendChatInput()">
+          <button class="btn-send" id="btn-send-chat" onclick="window.app.sendChatInput()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Tab 2 Content: RAG Vector Explorer -->
+      <div class="tab-content" id="content-tab-rag">
+        <div class="rag-container" id="rag-documents-index">
+          <div class="rag-header-desc">
+            Local vector database files synced inside the air-gapped boundary. These documents are dynamically retrieved based on semantic similarity search queries.
+          </div>
+          <!-- Populated dynamically via app.js -->
+        </div>
+      </div>
+    </section>
+    
+  </main>
+
+  <!-- Core JavaScript Libraries -->
+  <script src="runbook_db.js"></script>
+  <script src="topology.js"></script>
+  <script src="telemetry.js"></script>
+  <script src="copilot.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
