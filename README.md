@@ -1,5 +1,7 @@
 # Air-Gapped Predictive Copilot for Secure MPLS Operations (Nexus AI)
 
+### 🌐 Live Demo: [nexus-noc-copilot.onrender.com](https://nexus-noc-copilot.onrender.com)
+
 An autonomous, entirely offline AI NOC Copilot that predicts network anomalies, analyzes root-causes in natural language, and suggests remediation playbooks before SLA impacts occur. Designed to operate completely within air-gapped government and enterprise environments with zero external network dependencies.
 
 ---
